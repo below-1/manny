@@ -1,0 +1,147 @@
+scalar Date
+scalar Upload
+
+type BaseTransaksi {
+  nominal: Float!
+  waktu: Date!
+  keterangan: String
+  cabang: Cabang!
+  addedBy: User!
+}
+
+type Transaksi {
+  id: Int!
+  nominal: Float!
+  waktu: Date!
+  keterangan: String
+  idCabang: Int!
+  idAddedBy: Int!
+}
+
+type User {
+  id: Int!
+  nama: String!
+  avatar: String
+}
+
+type Cabang {
+  id: Int!
+  nama: String!
+  alamat: String
+  barbermen: [Barbermen!]
+  avatar: String
+}
+
+type Barbermen {
+  id: Int!
+  nama: String!
+  cabang: Cabang
+  avatar: String
+  aktif: Boolean
+}
+
+type Item {
+  id: Int!
+  nama: String!
+  deskripsi: String!
+  hargaJual: Float!
+  avatar: String!
+}
+
+type MutasiItem {
+  id: Int!
+  item: Item!
+  transaksi: BaseTransaksi!
+}
+
+type PaketJasa {
+  id: Int!
+  nama: String!
+  listJasa: [String]!
+  avatar: String!
+  harga: Float!
+  estimasiWaktu: Int!
+  pictures: [Media]!
+  cabang: [Cabang]!
+  keterangan: String!
+}
+
+type Media {
+  id: Int!
+  url: String!
+  description: String
+}
+
+type Sesi {
+  id: Int!
+  scheduledStartTime: String!
+  scheduledEndTime: String!
+  executionStartTime: String
+  executionEndTime: String
+  state: SesiState!
+  cabang: Cabang!
+  barbermen: Barbermen!
+  user: User!
+}
+
+enum SesiState {
+  SCHEDULED,
+  ONGOING,
+  DONE,
+  CANCELED
+}
+
+input PaginationOption {
+  skip: Int!
+  take: Int!
+}
+
+input ItemMutationsOption {
+  skip: Int!
+  take: Int!
+  idItem: Int!
+}
+
+input ItemCreateInput {
+  nama: String!
+  avatar: String
+  deskripsi: String
+  hargaJual: Float!
+  idCabang: Int!
+
+  nominal: Float!
+  jumlah: Int!
+  keterangan: String
+  waktu: Date
+  idAddedBy: Int!
+}
+
+input BaseMutasiInput {
+  idItem: Int!
+  nominal: Float!
+  jumlah: Int!
+  keterangan: String
+  waktu: Date
+  idAddedBy: Int!
+}
+
+input SellInput {
+  idItem: Int!
+  nominal: Float!
+  jumlah: Int!
+  keterangan: String
+  waktu: Date
+  idAddedBy: Int!
+  idForUser: Int!
+}
+
+type Query {
+  mutationFor(options: ItemMutationsOption) : [MutasiItem]!
+}
+
+type Mutation {
+  buyNewItem(payload: ItemCreateInput) : Item!
+  buyMoreItem(payload: BaseMutasiInput) : MutasiItem!
+  sellItem(payload: SellInput) : MutasiItem!
+  useItem(payload: BaseMutasiInput) : MutasiItem!
+}
