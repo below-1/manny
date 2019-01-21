@@ -19,4 +19,7 @@ export class User {
   username: string;
   @Column()
   password: string;
+
+  @Column()
+  avatar: string;
 }

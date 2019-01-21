@@ -1,17 +1,36 @@
-import { 
-  Entity, PrimaryGeneratedColumn,
-  Column, JoinColumn,
-  ManyToOne, OneToMany,
-  ManyToMany, JoinTable } from 'typeorm';
+import * as torm from 'typeorm';
 import { Cabang } from './Cabang';
 import { User } from './User'
-import { BaseTransaksi } from './BaseTransaksi';
 
-@Entity()
+@torm.Entity()
+@torm.TableInheritance({ column: { type: "varchar", name: "type" } })
 export class Transaksi {
-  @PrimaryGeneratedColumn()
+  @torm.PrimaryGeneratedColumn()
   id: number;
+  
+  @torm.Column()
+  type: string;
 
-  @Column(type => BaseTransaksi)
-  transaksi: BaseTransaksi;
+  @torm.Column('double', { default: 0 })
+  nominal: number;
+
+  @torm.Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
+  waktu: Date;
+
+  @torm.Column({ default: '' })
+  keterangan: string;
+
+  @torm.Column({ type: 'int', nullable: false })
+  idCabang: number;
+
+  @torm.Column({ type: 'int', nullable: false })
+  idAddedBy: number;
+
+  @torm.ManyToOne(type => Cabang)
+  @torm.JoinColumn({ name: 'idCabang' })
+  cabang: Cabang;
+
+  @torm.ManyToOne(type => User)
+  @torm.JoinColumn({ name: 'idAddedBy' })
+  addedBy: User;
 }

@@ -1,3 +1,12 @@
 import { startServer } from './app';
 
-startServer();
+async function start() {
+  try {
+    await startServer();
+  } catch (err) {
+    console.log('Error here');
+    console.log(err);
+  }
+}
+
+start();

@@ -2,18 +2,19 @@ import {
   Entity, PrimaryGeneratedColumn,
   Column, JoinColumn,
   ManyToOne, OneToMany,
-  ManyToMany, JoinTable } from 'typeorm';
+  ManyToMany, JoinTable,
+  ChildEntity } from 'typeorm';
 import { Cabang } from './Cabang';
 import { PaketJasa } from './PaketJasa';
 import { Barbermen } from './Barbermen';
 import { User } from './User';
-import { BaseTransaksi } from './BaseTransaksi';
+import { Transaksi } from './Transaksi';
 
 export enum SesiState {
-  SCHEDULED,
-  ONGOING,
-  DONE,
-  CANCELED
+  SCHEDULED = 'SCHEDULED',
+  ONGOING = 'ONGOING',
+  DONE = 'DONE',
+  CANCELED = 'CANCELED'
 }
 
 @Entity()
@@ -21,19 +22,19 @@ export class Sesi {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('timestamp')
+  @Column('timestamp', { nullable: false })
   scheduledStartTime: Date;
 
-  @Column('timestamp')
+  @Column('timestamp', { nullable: true })
   scheduledEndTime: Date;
 
-  @Column('timestamp')
+  @Column('timestamp', { nullable: true })
   executionStartTime: Date;
 
-  @Column('timestamp')
+  @Column('timestamp', { nullable: true })
   executionEndTime: Date;
 
-  @Column('enum', { enum: SesiState })
+  @Column('enum', { enum: SesiState, nullable: false, default: SesiState.SCHEDULED })
   state: SesiState;
 
   @Column('int')
@@ -51,15 +52,29 @@ export class Sesi {
   @JoinColumn({ name: 'idForUser' })
   forUser: User;
 
-  @Column(type => BaseTransaksi, { prefix: false })
-  transaksi: BaseTransaksi;
-
   @Column({ type: 'int', nullable: false })
   idPaketJasa: number;
   @ManyToOne(type => PaketJasa)
   @JoinColumn({ name: 'idPaketJasa' })
   paketJasa: PaketJasa;
 
+  @Column('double', { default: 0 })
+  nominal: number;
+
+  @Column('timestamp', { nullable: true })
+  waktu: Date;
+
   @Column({ type: 'int', nullable: false })
   idCabang: number;
+
+  @Column({ type: 'int', nullable: false })
+  idAddedBy: number;
+
+  @ManyToOne(type => Cabang)
+  @JoinColumn({ name: 'idCabang' })
+  cabang: Cabang;
+
+  @ManyToOne(type => User)
+  @JoinColumn({ name: 'idAddedBy' })
+  addedBy: User;
 }

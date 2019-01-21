@@ -12,16 +12,6 @@ import {
   ItemMutationsOption
 } from '../types';
 
-function transaksi(btInput: BaseTransaksiInput) : entities.BaseTransaksi {
-  let bt = new entities.BaseTransaksi();
-  bt.embedded_idAddedBy = btInput.idAddedBy;
-  bt.embedded_idCabang = btInput.idCabang;
-  bt.nominal = btInput.nominal;
-  bt.waktu = btInput.waktu;
-  bt.keterangan = btInput.keterangan;
-  return bt;
-}
-
 export class Inventory {
 
   private itemRepo: torm.Repository<entities.Item>;
@@ -40,7 +30,6 @@ export class Inventory {
 
   public async buyNewItem (item: ItemCreateInput) : Promise<entities.Item> {
     // Create item
-    console.log(item);
     let input: DeepPartial<entities.Item> = {
       nama: item.nama,
       avatar: item.avatar,
@@ -68,13 +57,16 @@ export class Inventory {
   }
 
   public async buyMoreItem (payload: BaseMutasiInput) : Promise<entities.Pembelian> {
-    let pembelian = this.pembelianRepo.create({ jumlah: payload.jumlah, idItem: payload.idItem } as DeepPartial<entities.Pembelian>);
+    console.log(payload);
     // Get item
     let item = await this.itemRepo.findOne(payload.idItem);
+    console.log('item = ', item);
     // Create transaksi
     let idCabang = item.idCabang;
 
-    pembelian.transaksi = transaksi({
+    let pembelian = this.pembelianRepo.create({ 
+      jumlah: payload.jumlah,
+      idItem: payload.idItem,
       idCabang: idCabang,
       idAddedBy: payload.idAddedBy,
       keterangan: payload.keterangan,
@@ -82,7 +74,7 @@ export class Inventory {
 
       // Nominal must be negative here
       nominal: payload.nominal * -1
-    });
+    } as DeepPartial<entities.Pembelian>);
 
     let result = await this.pembelianRepo.save(pembelian);
     return result;
@@ -92,26 +84,25 @@ export class Inventory {
     if (!(await this.stockGreaterThan(payload.idItem, payload.jumlah))) {
       throw new Error("Stock tidak mencukupi");
     }
-    let penjualanInput = {
-      // Jumlah must be negative here
-      jumlah: payload.jumlah * -1,
-      idItem: payload.jumlah,
-      idForUser: payload.idForUser
-    } as DeepPartial<entities.Penjualan>;
-    let penjualan = this.penjualanRepo.create(penjualanInput);
-  
+
     // Get item
     let item = await this.itemRepo.findOne(payload.idItem);
     // Create transaksi
     let idCabang = item.idCabang;
-    let transaksiInput = {
+
+    let penjualanInput = {
+      // Jumlah must be negative here
+      jumlah: payload.jumlah * -1,
+      idItem: payload.idItem,
+      idForUser: payload.idForUser,
       idCabang,
       idAddedBy: payload.idAddedBy,
       waktu: payload.waktu,
       nominal: payload.nominal,
       keterangan: payload.keterangan
-    };
-    penjualan.transaksi = transaksi(transaksiInput);
+    } as DeepPartial<entities.Penjualan>;
+    let penjualan = this.penjualanRepo.create(penjualanInput);
+  
     return await this.penjualanRepo.save(penjualan);
   }
 
@@ -120,50 +111,52 @@ export class Inventory {
       throw new Error("Stock tidak mencukupi");
     }
 
+    // Get item
+    let item = await this.itemRepo.findOne(payload.idItem);
+    let idCabang = item.idCabang;
     let penggunaanInput = {
       // Jumlah must be negative
       jumlah: payload.jumlah * -1,
-      idItem: payload.jumlah
-    } as DeepPartial<entities.Penggunaan>;
-    let penggunaan = this.penggunaanRepo.create(penggunaanInput);
-    // Get item
-    let item = await this.itemRepo.findOne(payload.idItem);
-    // Create transaksi
-    let idCabang = item.idCabang;
-
-    let transaksiInput = {
+      idItem: payload.jumlah,
       idCabang,
       idAddedBy: payload.idAddedBy,
       waktu: payload.waktu,
       keterangan: payload.keterangan,
       nominal: 0
-    };
+    } as DeepPartial<entities.Penggunaan>;
+    let penggunaan = this.penggunaanRepo.create(penggunaanInput);
 
-    penggunaan.transaksi = transaksi(transaksiInput);
     return await this.penggunaanRepo.save(penggunaan);
   }
 
   public async mutationFor(idItem: number, { skip = 0, take = 30 }: PaginationOption): Promise<entities.MutasiItem[]> {
     let where = { idItem };
     let options = { where, skip, take };
-    let penggunaan : entities.MutasiItem[] = await this.penggunaanRepo.find(options);
-    let penjualan : entities.MutasiItem[] = await this.penjualanRepo.find({ ...options, relations: ["forUser"] });
-    let pembelian : entities.MutasiItem[] = await this.pembelianRepo.find(options);
+    let penggunaan : entities.Penggunaan[] = await this.penggunaanRepo.find({ ...options, relations: ["addedBy"] });
+    let penjualan : entities.Penjualan[] = await this.penjualanRepo.find({ ...options, relations: ["forUser", "addedBy"] });
+    let pembelian : entities.Pembelian[] = await this.pembelianRepo.find({ ...options, relations: ["addedBy"] });
 
-    let result = penggunaan.concat(penjualan).concat(pembelian);
+    let result: any[] = penggunaan.concat(penjualan).concat(pembelian);
 
     // Sorting descending
-    result = result.sort((a, b) => a.transaksi.waktu.getMilliseconds() - b.transaksi.waktu.getMilliseconds());
+    result = result.sort((a, b) => a.waktu.getMilliseconds() - b.waktu.getMilliseconds());
 
     // Change (nominal) and (jumlah) accordingly
     // If row is Pembelian => change nominal to positive
     // If row is Penjualan or Penggunaan => change jumlah to positive
     result = result.map(t => {
-      if (t instanceof entities.Penggunaan || t instanceof entities.Penjualan) {
+      // let t: any = Object.assign({}, x);
+      if (t instanceof entities.Penggunaan) {
         t.jumlah *= -1;
+        t.type = 'Penggunaan';
+      }
+      if (t instanceof entities.Penjualan) {
+        t.jumlah *= -1;
+        t.type = 'Penjualan';
       }
       if (t instanceof entities.Pembelian) {
-        t.transaksi.nominal *= -1;
+        t.nominal *= -1;
+        t.type = 'Pembelian';
       }
       return t;
     });
@@ -173,7 +166,8 @@ export class Inventory {
 
   public async updateMutasiFor(idMutasi: number, payload: BaseUpdateMutasiInput) : Promise<entities.MutasiItem> {
     let em = await this.connection.createEntityManager();
-    let row = await em.findOne<entities.MutasiItem>(entities.MutasiItem, idMutasi);
+    let row: entities.MutasiItem;
+    row = await em.findOne<entities.MutasiItem>(entities.MutasiItem, idMutasi);
 
     if (row instanceof entities.Pembelian) {
       if (payload.nominal) { payload.nominal *= -1; }
@@ -185,8 +179,8 @@ export class Inventory {
       if (payload.jumlah) { payload.nominal = 0; }
     }
 
-    if (payload.nominal) row.transaksi.nominal = payload.nominal;
-    if (payload.keterangan) row.transaksi.keterangan = payload.keterangan;
+    if (payload.nominal) row.nominal = payload.nominal;
+    if (payload.keterangan) row.keterangan = payload.keterangan;
     if (payload.jumlah) row.jumlah = payload.jumlah;
 
     let result = em.save(row);

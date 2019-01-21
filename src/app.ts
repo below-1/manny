@@ -4,6 +4,8 @@
 import * as torm from 'typeorm';
 import * as models from './models';
 import * as inventory from './inventory';
+import * as booking from './booking';
+import mainResolverFn from './resolvers';
 import * as fs from 'fs';
 import * as util from 'util';
 const express = require('express');
@@ -24,13 +26,11 @@ export async function createDbConnection() : Promise<Box> {
     models.Barbermen,
     models.Jasa,
     models.PaketJasa,
-    models.Transaksi,
     models.Sesi,
     models.Picture,
     models.Item,
     models.MutasiItem,
     models.Media,
-    models.BaseTransaksi,
     models.Pembelian,
     models.Penjualan,
     models.Penggunaan
@@ -41,7 +41,7 @@ export async function createDbConnection() : Promise<Box> {
     username: 'root',
     port: 3306,
     database: 'manliest-db',
-    synchronize: true,
+    synchronize: false,
     logging: true,
     entities
   });
@@ -56,12 +56,11 @@ export async function createDbConnection() : Promise<Box> {
       paketJasa: (await dbConn.getRepository<models.PaketJasa>(models.PaketJasa)),
       sesi: (await dbConn.getRepository<models.Sesi>(models.Sesi)),
       user: (await dbConn.getRepository<models.User>(models.User)),
-      mutasiItem: (await dbConn.getRepository<models.MutasiItem>(models.MutasiItem)),
       item: (await dbConn.getRepository<models.Item>(models.Item)),
+      mutasiItem: (await dbConn.getRepository<models.MutasiItem>(models.MutasiItem)),
       pembelian: (await dbConn.getRepository<models.Pembelian>(models.Pembelian)),
       penjualan: (await dbConn.getRepository<models.Penjualan>(models.Penjualan)),
-      penggunaan: (await dbConn.getRepository<models.Penggunaan>(models.Penggunaan)),
-      transaksi: (await dbConn.getRepository<models.Transaksi>(models.Transaksi))
+      penggunaan: (await dbConn.getRepository<models.Penggunaan>(models.Penggunaan))
     }
   };
 }
@@ -72,10 +71,21 @@ export async function startServer() {
   const inventoryService = new inventory.Inventory(db);
   const inventoryResolver = await inventory.Resolver({ box: db, service: inventoryService });
 
+  const bookingService = new booking.Booking(db.connection);
+  const bookingResolver = await booking.Resolver({ box: db, service: bookingService });
+
+  const mainResolver = await mainResolverFn({ 
+    box: db,
+    services: {
+      inventory: inventoryService
+    }
+  });
+
   const textGql = (await readFile('./src/schema.graphql')).toString();
+
   const schema = makeExecutableSchema({
     typeDefs: textGql,
-    resolvers: inventoryResolver
+    resolvers: [ inventoryResolver, bookingResolver, mainResolver ]
   });
   const apolloServer = new ApolloServer({ schema });
 

@@ -1,13 +1,12 @@
 import * as torm from 'typeorm';
+import { Transaksi } from './Transaksi';
 import { Item } from './Item';
-import { BaseTransaksi } from './BaseTransaksi';
+import { Cabang } from './Cabang';
+import { User } from './User';
 
 @torm.Entity()
 @torm.TableInheritance({ column: { type: "varchar", name: "mutasiType" } })
-export class MutasiItem {
-  @torm.PrimaryGeneratedColumn()
-  id: number;
-
+export class MutasiItem extends Transaksi {
   @torm.Column()
   jumlah: number;
 
@@ -18,6 +17,26 @@ export class MutasiItem {
   @torm.JoinColumn({ name: 'idItem' })
   item: Item;
 
-  @torm.Column(type => BaseTransaksi, { prefix: false })
-  transaksi: BaseTransaksi;
+  @torm.Column('double', { default: 0 })
+  nominal: number;
+
+  @torm.Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
+  waktu: Date;
+
+  @torm.Column({ default: '' })
+  keterangan: string;
+
+  @torm.Column({ type: 'int', nullable: false })
+  idCabang: number;
+
+  @torm.Column({ type: 'int', nullable: false })
+  idAddedBy: number;
+
+  @torm.ManyToOne(type => Cabang)
+  @torm.JoinColumn({ name: 'idCabang' })
+  cabang: Cabang;
+
+  @torm.ManyToOne(type => User)
+  @torm.JoinColumn({ name: 'idAddedBy' })
+  addedBy: User;
 }
