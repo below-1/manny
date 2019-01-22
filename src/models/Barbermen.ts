@@ -27,7 +27,7 @@ export class Barbermen {
   @Column('int')
   idCabang: number;
 
-  @ManyToOne(type => Cabang)
+  @ManyToOne(type => Cabang, cabang => cabang.listBarbermen)
   @JoinColumn({ name: 'idCabang' })
   cabang: Cabang;
 

@@ -3,10 +3,11 @@ import { Transaksi } from './Transaksi';
 import { Item } from './Item';
 import { Cabang } from './Cabang';
 import { User } from './User';
+import { TimeSortable } from '../types';
 
 @torm.Entity()
 @torm.TableInheritance({ column: { type: "varchar", name: "mutasiType" } })
-export class MutasiItem extends Transaksi {
+export class MutasiItem extends Transaksi implements TimeSortable {
   @torm.Column()
   jumlah: number;
 

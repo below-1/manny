@@ -14,19 +14,14 @@ type BaseTransaksi {
   addedBy: User!
 }
 
-type Transaksi {
-  id: Int!
-  nominal: Float!
-  waktu: Date!
-  keterangan: String
-  idCabang: Int!
-  idAddedBy: Int!
-}
-
 type User {
   id: Int!
   nama: String!
-  avatar: String
+  avatar: String!
+  kategori: String!
+
+  sesi: [Sesi]!
+  transaksi: [Transaksi]!
 }
 
 type Cabang {
@@ -34,7 +29,9 @@ type Cabang {
   nama: String!
   alamat: String
   barbermen: [Barbermen!]
-  avatar: String
+  avatar: String!
+
+  transaksi: [Transaksi]!
 }
 
 type Barbermen {
@@ -43,6 +40,7 @@ type Barbermen {
   cabang: Cabang
   avatar: String
   aktif: Boolean
+  sesi: [Sesi]!
 }
 
 type Item {
@@ -103,6 +101,7 @@ type Penggunaan {
 }
 
 union MutasiItem = Pembelian | Penjualan | Penggunaan
+union Transaksi = Pembelian | Penjualan | Penggunaan | Sesi
 
 type PaketJasa {
   id: Int!
@@ -113,6 +112,7 @@ type PaketJasa {
   estimasiWaktu: Int!
   pictures: [Media]!
   cabang: [Cabang]!
+  sessions: [Sesi]!
   keterangan: String!
 }
 
@@ -228,13 +228,32 @@ input FindSessionInRangeOptions {
   end: Date!
 }
 
+input CreateAdminInput {
+  username: String!
+  nama: String!
+  idsCabang: [Int]!
+}
+
 type Query {
+
+  cabangById(id: Int!) : [Cabang]!
   itemById(id: Int!, options: PaginationOption!) : Item!
   sessionById(id: Int!) : Sesi!
+  barbermenById(id: Int!) : Barbermen!
+  paketJasaById(id: Int!) : PaketJasa!
+  mutasiById(id: Int!) : MutasiItem!
+
   listSessionInRange(options: FindSessionInRangeOptions!) : [Sesi]!
+  listUser(options: PaginationOption!) : [PaketJasa]!
+
+  timeline(options: PaginationOption!) : [Transaksi]!
+  
 }
 
 type Mutation {
+
+  signUpCustomer(nama: String!) : User!
+  signUpAdmin(payload: CreateAdminInput!) : User!
 
   createCabang(payload: CreateCabangInput!) : Cabang!
   createPaketJasa(payload: CreatePaketJasaInput!) : PaketJasa!

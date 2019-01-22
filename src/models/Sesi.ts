@@ -9,6 +9,7 @@ import { PaketJasa } from './PaketJasa';
 import { Barbermen } from './Barbermen';
 import { User } from './User';
 import { Transaksi } from './Transaksi';
+import { TimeSortable } from '../types';
 
 export enum SesiState {
   SCHEDULED = 'SCHEDULED',
@@ -18,7 +19,7 @@ export enum SesiState {
 }
 
 @Entity()
-export class Sesi {
+export class Sesi implements TimeSortable {
   @PrimaryGeneratedColumn()
   id: number;
 

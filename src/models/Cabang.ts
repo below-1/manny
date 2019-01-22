@@ -3,6 +3,12 @@ import {
   Column, JoinColumn,
   ManyToOne, OneToMany,
   ManyToMany, JoinTable } from 'typeorm';
+import {
+  Barbermen
+} from './Barbermen';
+import {
+  PaketJasa
+} from './PaketJasa';
 
   @Entity()
   export class Cabang {
@@ -14,4 +20,10 @@ import {
   
     @Column()
     alamat: string;
+
+    @ManyToMany(type => PaketJasa, pj => pj.listCabang)
+    listPaketJasa: PaketJasa[];
+
+    @ManyToMany(type => Barbermen, barbermen => barbermen.cabang)
+    listBarbermen: Barbermen[];
   }

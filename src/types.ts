@@ -111,3 +111,39 @@ export interface FindSessionInRangeOptions extends CommonTimeFilter {
   idCabang: number;
   states: SesiState[];
 }
+
+export interface WithBox {
+  box: Box;
+  services: any;
+}
+
+export interface CreateCabangInput {
+  nama: string;
+  avatar: string;
+  alamat: string;
+}
+
+export interface CreateBarbermenInput {
+  nama: string;
+  avatar: string;
+  idCabang: number;
+}
+
+export interface CreatePaketJasaInput {
+  nama: string;
+  items: string[];
+  estimasiWaktu: number;
+  listCabang: number[];
+  avatar: string;
+  harga: number;
+}
+
+export interface CreateAdminInput {
+  username: string;
+  nama: string;
+  idsCabang: number[];
+}
+
+export interface TimeSortable {
+  waktu: Date;
+}
