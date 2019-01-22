@@ -3,15 +3,17 @@
 */
 import * as torm from 'typeorm';
 import * as models from './models';
-import * as inventory from './inventory';
-import * as booking from './booking';
 import mainResolverFn from './resolvers';
 import * as fs from 'fs';
 import * as util from 'util';
+import * as services from './services';
+
 const express = require('express');
+
 import {
   Box
 } from './types';
+
 import {
   ApolloServer,
   makeExecutableSchema
@@ -68,24 +70,18 @@ export async function createDbConnection() : Promise<Box> {
 export async function startServer() {
   const db = await createDbConnection();
 
-  const inventoryService = new inventory.Inventory(db);
-  const inventoryResolver = await inventory.Resolver({ box: db, service: inventoryService });
-
-  const bookingService = new booking.Booking(db.connection);
-  const bookingResolver = await booking.Resolver({ box: db, service: bookingService });
-
-  const mainResolver = await mainResolverFn({ 
+  const resolverArgs = {
     box: db,
-    services: {
-      inventory: inventoryService
-    }
-  });
+    inventory: new services.Inventory(db),
+    sesi: new services.Sesi(db.connection)
+  };
 
+  const resolvers = await mainResolverFn(resolverArgs);
   const textGql = (await readFile('./src/schema.graphql')).toString();
 
   const schema = makeExecutableSchema({
     typeDefs: textGql,
-    resolvers: [ inventoryResolver, bookingResolver, mainResolver ]
+    resolvers: resolvers
   });
   const apolloServer = new ApolloServer({ schema });
 

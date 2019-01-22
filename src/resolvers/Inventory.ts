@@ -11,9 +11,9 @@ import {
   PaginationOption,
   ItemMutationsOption
 } from '../types';
-import { Inventory } from './service';
+import { Inventory } from '../services/Inventory';
 
-export async function Resolver (options: { box: Box, service: Inventory }) {
+export default async function (options: { box: Box, service: Inventory }) {
   const { box, service } = options;
   return {
     Query: {

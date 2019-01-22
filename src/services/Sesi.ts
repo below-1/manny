@@ -12,7 +12,7 @@ import {
 
 type TimeFilter = CommonTimeFilter | SimpleTimeSelection;
 
-export class Booking {
+export class Sesi {
   private sessionRepo: torm.Repository<models.Sesi>;
   
   constructor (private connection: torm.Connection) {

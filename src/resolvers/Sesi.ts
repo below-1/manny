@@ -15,9 +15,9 @@ import {
   SimpleTimeSelection,
   FindSessionInRangeOptions
 } from '../types';
-import { Booking } from './service';
+import { Sesi } from '../services/Sesi';
 
-export async function Resolver (options: { box: Box, service: Booking }) {
+export default async function (options: { box: Box, service: Sesi }) {
   
   const { box, service } = options;
 
@@ -33,7 +33,6 @@ export async function Resolver (options: { box: Box, service: Booking }) {
       },
       sessionById: async (_, { id } : { id: number }) => {
         let result: any = await service.sessionById(id);
-        console.log(result);
         result.user = result.forUser;
         return result;
       }
@@ -67,6 +66,20 @@ export async function Resolver (options: { box: Box, service: Booking }) {
 
       deleteSession: async (_: any, { id } : { id: number }) => {
         return await service.deleteSession(id);
+      }
+    },
+    Sesi: {
+      paketJasa: async (sesi: entities.Sesi, __ : any) => {
+        return await box.repo.paketJasa.findOne(sesi.idPaketJasa);
+      },
+      user: async (sesi: entities.Sesi, __: any) => {
+        return await box.repo.user.findOne(sesi.idForUser);
+      },
+      addedBy: async (sesi: entities.Sesi, __: any) => {
+        return await box.repo.user.findOne(sesi.idAddedBy);
+      },
+      barbermen: async (sesi: entities.Sesi, __: any) => {
+        return await box.repo.user.findOne(sesi.idBarbermen);
       }
     }
   };
