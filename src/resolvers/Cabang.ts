@@ -2,12 +2,13 @@ import {
   WithBox,
   CreateBarbermenInput,
   CreateCabangInput,
-  PaginationOption
+  PaginationOption,
+  Box
 } from '../types';
 import * as torm from 'typeorm';
 import * as models from '../models';
 
-export default async function ({ box, services } : WithBox) {
+export default async function ({ box } : { box: Box }) {
   return {
     Query: {
       listCabang: async (_: any, __: any) => {

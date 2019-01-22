@@ -1,12 +1,13 @@
 import {
   WithBox,
   CreateBarbermenInput,
-  PaginationOption
+  PaginationOption,
+  Box
 } from '../types';
 import * as torm from 'typeorm';
 import * as models from '../models';
 
-export default async function ({ box, services } : WithBox) {
+export default async function ({ box } : { box: Box }) {
   return {
     Query: {
       barbermenById: async (_: any, { id }) => {

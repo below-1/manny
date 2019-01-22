@@ -1,4 +1,3 @@
-import { Box } from '../types';
 import * as torm from 'typeorm';
 import * as models from '../models';
 import {
@@ -6,10 +5,10 @@ import {
   PaginationOption,
   CreatePaketJasaInput,
   TimeSortable,
-  WithBox
+  Box
 } from '../types';
 
-export default async function ({ box, services } : WithBox) {
+export default async function ({ box } : { box: Box }) {
 
   async function findMutations (cabang: models.Cabang, options: PaginationOption) : Promise<models.MutasiItem[]> {
     let list = await box.repo.mutasiItem.find({ 

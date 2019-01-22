@@ -1,5 +1,5 @@
 import {
-  WithBox,
+  Box,
   PaginationOption,
   CreateAdminInput,
   TimeSortable
@@ -7,7 +7,7 @@ import {
 import * as torm from 'typeorm';
 import * as models from '../models';
 
-export default async function ({ box, services } : WithBox) {
+export default async function ({ box } : { box: Box }) {
 
   async function findMutations (user: models.User, options: PaginationOption) : Promise<models.MutasiItem[]> {
     if (user.kategori == 'CUSTOMER') return [];
