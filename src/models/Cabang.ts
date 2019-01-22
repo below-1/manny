@@ -2,7 +2,8 @@ import {
   Entity, PrimaryGeneratedColumn,
   Column, JoinColumn,
   ManyToOne, OneToMany,
-  ManyToMany, JoinTable } from 'typeorm';
+  ManyToMany, JoinTable,
+  RelationId } from 'typeorm';
 import {
   Barbermen
 } from './Barbermen';
@@ -23,7 +24,9 @@ import {
 
     @ManyToMany(type => PaketJasa, pj => pj.listCabang)
     listPaketJasa: PaketJasa[];
+    @RelationId((cabang: Cabang) => cabang.listPaketJasa)
+    idsPaketJasa: number[];
 
-    @ManyToMany(type => Barbermen, barbermen => barbermen.cabang)
+    @ManyToOne(type => Barbermen, barbermen => barbermen.cabang)
     listBarbermen: Barbermen[];
   }

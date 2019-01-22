@@ -26,10 +26,9 @@ export class PaketJasa {
   @Column('int')
   estimasiWaktu: number;
 
-  @ManyToMany(type => Cabang)
-  @JoinTable()
+  @ManyToMany(type => Cabang, cabang => cabang.listPaketJasa)
+  @JoinTable({ name: 'paket_jasa_cabang' })
   listCabang: Cabang[];
-
   @RelationId((pj: PaketJasa) => pj.listCabang)
   idsCabang: number[];
 }

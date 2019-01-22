@@ -20,12 +20,26 @@ export default async function ({ box } : { box: Box }) {
     },
     Mutation: {
       createPaketJasa: async (_: any, { payload } : { payload: CreatePaketJasaInput }) => {
-        let _payload: any = { ...payload, idsCabang: payload.listCabang };
-        delete _payload.listCabang;
-        _payload.items = JSON.stringify(_payload.items);
-        let result = await box.repo.paketJasa.create(_payload as torm.DeepPartial<models.PaketJasa>);
-        result = await box.repo.paketJasa.save(_payload);
-        return result;
+        return await box.connection.transaction(async em => {
+          let _payload: any = { ...payload, idsCabang: payload.listCabang };
+          delete _payload.listCabang;
+          _payload.items = JSON.stringify(_payload.items);
+
+          let repo = em.getRepository<models.PaketJasa>(models.PaketJasa);
+          let result = await repo.create(_payload as torm.DeepPartial<models.PaketJasa>);
+          result = await repo.save(_payload);
+
+          let relationRowInputs = _payload.idsCabang.map(id => ({ paketJasaId: result.id, cabangId: id }));
+
+          // Insert ids cabang.
+          await em.createQueryBuilder()
+            .insert()
+            .into('paket_jasa_cabang')
+            .values(relationRowInputs)
+            .execute();
+          
+          return result;
+        });
       }
     },
     PaketJasa: {

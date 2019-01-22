@@ -12,10 +12,13 @@ export default async function ({ box } : { box: Box }) {
   return {
     Query: {
       listCabang: async (_: any, __: any) => {
-        return await ( box.repo.cabang.find() );
+        let result = await ( box.repo.cabang.find() );
+        console.log(result);
+        return result;
       },
       cabangById: async (_: any, { id } : { id: number }) => {
-        return await ( box.repo.cabang.findOne(id) );
+        let result = await ( box.repo.cabang.findOne(id) );
+        return result;
       }
     },
     Mutation: {
@@ -36,11 +39,24 @@ export default async function ({ box } : { box: Box }) {
         );
       },
       listPaketJasa: async (cabang: models.Cabang, __ : any) => {
-        return await (
-          box.repo.cabang.findOne(cabang.id, {
-            relations: ['listPaketJasa']
-          })
-        );
+        console.log(cabang);
+        let result: models.PaketJasa[];
+        try {
+          let xs = (
+            await box.connection.createQueryBuilder(models.Cabang, "cabang")
+              .leftJoinAndSelect("cabang.listPaketJasa", "pj")
+              .where("cabang.id = :id", { id: cabang.id })
+              .getOne()
+          );
+          console.log(xs);
+          result = xs.listPaketJasa;
+        } catch (err) {
+          console.log(err);
+          throw err;
+        }
+        
+        // console.log(result);
+        return result;
       }
     }
   }

@@ -28,10 +28,10 @@ type Cabang {
   id: Int!
   nama: String!
   alamat: String
-  barbermen: [Barbermen!]
   avatar: String!
 
-  transaksi: [Transaksi]!
+  listBarbermen: [Barbermen!]
+  listPaketJasa: [PaketJasa]!
 }
 
 type Barbermen {
@@ -40,7 +40,7 @@ type Barbermen {
   cabang: Cabang
   avatar: String
   aktif: Boolean
-  sesi: [Sesi]!
+  sessions(options: PaginationOption): [Sesi]!
 }
 
 type Item {
@@ -131,6 +131,7 @@ type Sesi {
   state: SesiState!
   cabang: Cabang!
   barbermen: Barbermen!
+  paketJasa: PaketJasa!
   user: User!
   addedBy: User!
   rating: Int
@@ -234,19 +235,26 @@ input CreateAdminInput {
   idsCabang: [Int]!
 }
 
+input TimelineOptions {
+  idCabang: Int!
+  skip: Int!
+  take: Int!
+}
+
 type Query {
 
+  listCabang: [Cabang]!
   cabangById(id: Int!) : [Cabang]!
   itemById(id: Int!, options: PaginationOption!) : Item!
   sessionById(id: Int!) : Sesi!
   barbermenById(id: Int!) : Barbermen!
   paketJasaById(id: Int!) : PaketJasa!
   mutasiById(id: Int!) : MutasiItem!
-
+  userById(id: Int!) : User!
   listSessionInRange(options: FindSessionInRangeOptions!) : [Sesi]!
   listUser(options: PaginationOption!) : [PaketJasa]!
 
-  timeline(options: PaginationOption!) : [Transaksi]!
+  timeline(options: TimelineOptions!) : [Transaksi]!
   
 }
 

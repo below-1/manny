@@ -147,3 +147,7 @@ export interface CreateAdminInput {
 export interface TimeSortable {
   waktu: Date;
 }
+
+export interface TimelineOptions extends PaginationOption {
+  idCabang: number;
+}

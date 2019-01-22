@@ -21,7 +21,7 @@ import {
 
 const readFile = util.promisify(fs.readFile);
 
-export async function createDbConnection() : Promise<Box> {
+export async function createDbConnection({ sync }) : Promise<Box> {
   const entities = [
     models.Cabang,
     models.User,
@@ -43,7 +43,7 @@ export async function createDbConnection() : Promise<Box> {
     username: 'root',
     port: 3306,
     database: 'manliest-db',
-    synchronize: false,
+    synchronize: sync,
     logging: true,
     entities
   });
@@ -68,7 +68,7 @@ export async function createDbConnection() : Promise<Box> {
 }
 
 export async function startServer() {
-  const db = await createDbConnection();
+  const db = await createDbConnection({ sync: true });
 
   const resolverArgs = {
     box: db,

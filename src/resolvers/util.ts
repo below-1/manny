@@ -5,17 +5,18 @@ import {
   PaginationOption,
   CreatePaketJasaInput,
   TimeSortable,
+  TimelineOptions,
   Box
 } from '../types';
 
 export default async function ({ box } : { box: Box }) {
 
-  async function findMutations (cabang: models.Cabang, options: PaginationOption) : Promise<models.MutasiItem[]> {
+  async function findMutations (idCabang: number, options: PaginationOption) : Promise<models.MutasiItem[]> {
     let list = await box.repo.mutasiItem.find({ 
       ...options,
       relations: ['cabang'],
       where: {
-        idCabang: cabang.id
+        idCabang
       }
     });
 
@@ -26,23 +27,25 @@ export default async function ({ box } : { box: Box }) {
     })
   }
 
-  async function findSession(cabang: models.Cabang, options: PaginationOption) : Promise<models.Sesi[]> {
+  async function findSession(idCabang: number, options: PaginationOption) : Promise<models.Sesi[]> {
     return await box.repo.sesi.find({ 
       ...options,
       where: {
-        idCabang: cabang.id
+        idCabang
       }
     });
   }
 
   return {
     Query: {
-      timeline: async (cabang: models.Cabang, { options } : { options: PaginationOption }) => {
-        let mutations = (await findMutations(cabang, options)) as TimeSortable[];
-        let sessions = (await findSession(cabang, options)) as TimeSortable[];
+      timeline: async (_: any, { idCabang, skip, take } : TimelineOptions) => {
+        let cabang = await box.repo.cabang.findOne(idCabang);
+        let pageOptions = { skip, take };
+        let mutations = (await findMutations(idCabang, pageOptions)) as TimeSortable[];
+        let sessions = (await findSession(idCabang, pageOptions)) as TimeSortable[];
         let result = mutations.concat(sessions);
         result = result.sort((a, b) => (a.waktu).getTime() - (b.waktu).getTime());
-        return result.slice(0, options.take);
+        return result.slice(0, take);
       }
     },
     Mutation: {
