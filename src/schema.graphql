@@ -106,7 +106,7 @@ union Transaksi = Pembelian | Penjualan | Penggunaan | Sesi
 type PaketJasa {
   id: Int!
   nama: String!
-  listJasa: [String]!
+  items: [String]!
   avatar: String!
   harga: Float!
   estimasiWaktu: Int!
@@ -222,6 +222,16 @@ input CreatePaketJasaInput {
   harga: Float!
 }
 
+input UpdatePaketJasaInput {
+  nama: String!
+  items: [String]!
+  estimasiWaktu: Int!
+  avatar: String!
+  listCabang: [Int]!
+  harga: Float!
+  keterangan: String
+}
+
 input FindSessionInRangeOptions {
   idCabang: Int!
   states: [SesiState]!
@@ -244,7 +254,7 @@ input TimelineOptions {
 type Query {
 
   listCabang: [Cabang]!
-  cabangById(id: Int!) : [Cabang]!
+  cabangById(id: Int!) : Cabang!
   itemById(id: Int!, options: PaginationOption!) : Item!
   sessionById(id: Int!) : Sesi!
   barbermenById(id: Int!) : Barbermen!
@@ -264,8 +274,13 @@ type Mutation {
   signUpAdmin(payload: CreateAdminInput!) : User!
 
   createCabang(payload: CreateCabangInput!) : Cabang!
+  updateCabang(id: Int!, payload: CreateCabangInput!) : Cabang
+
   createPaketJasa(payload: CreatePaketJasaInput!) : PaketJasa!
+  updatePaketJasa(id: Int!, payload: UpdatePaketJasaInput!) : PaketJasa!
+
   createBarbermen(payload: CreateBarbermenInput!) : Barbermen!
+  updateBarbermen(id: Int!, payload: CreateBarbermenInput!) : Barbermen
 
   buyNewItem(payload: ItemCreateInput!) : Pembelian!
   buyMoreItem(payload: BaseMutasiInput!) : Pembelian!

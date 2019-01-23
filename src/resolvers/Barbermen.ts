@@ -21,6 +21,14 @@ export default async function ({ box } : { box: Box }) {
         let result = await box.repo.barbermen.create(payload as torm.DeepPartial<models.Barbermen>)
         await box.repo.barbermen.save(result)
         return result
+      },
+      updateBarbermen: async (_: any, { id, payload } : { id: number, payload: CreateBarbermenInput }) => {
+        let barbermen = await box.repo.barbermen.findOne(id);
+        if (!barbermen) throw new Error('Can not find barbermen');
+        barbermen.nama = payload.nama;
+        barbermen.avatar = payload.avatar;
+        barbermen.idCabang = payload.idCabang;
+        return barbermen;
       }
     },
     Barbermen: {

@@ -13,7 +13,6 @@ export default async function ({ box } : { box: Box }) {
     Query: {
       listCabang: async (_: any, __: any) => {
         let result = await ( box.repo.cabang.find() );
-        console.log(result);
         return result;
       },
       cabangById: async (_: any, { id } : { id: number }) => {
@@ -26,6 +25,15 @@ export default async function ({ box } : { box: Box }) {
         let cabangInput = await box.repo.cabang.create(payload as torm.DeepPartial<models.Cabang>);
         let result = await box.repo.cabang.save(cabangInput);
         return result;
+      },
+      updateCabang: async (_: any, { id, payload }) => {
+        let cabang = await box.repo.cabang.findOne(id);
+        if (!cabang) {
+          throw Error('can not find cabang')
+        }
+        cabang.nama = payload.nama;
+        cabang.alamat = payload.alamat;
+        return cabang;
       }
     },
     Cabang: {
@@ -39,7 +47,6 @@ export default async function ({ box } : { box: Box }) {
         );
       },
       listPaketJasa: async (cabang: models.Cabang, __ : any) => {
-        console.log(cabang);
         let result: models.PaketJasa[];
         try {
           let xs = (
@@ -48,7 +55,6 @@ export default async function ({ box } : { box: Box }) {
               .where("cabang.id = :id", { id: cabang.id })
               .getOne()
           );
-          console.log(xs);
           result = xs.listPaketJasa;
         } catch (err) {
           console.log(err);

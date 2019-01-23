@@ -138,6 +138,16 @@ export interface CreatePaketJasaInput {
   harga: number;
 }
 
+export interface UpdatePaketJasaInput {
+  nama: string;
+  items: string[];
+  estimasiWaktu: number;
+  avatar: string;
+  listCabang: number[];
+  harga: number;
+  keterangan: string;
+}
+
 export interface CreateAdminInput {
   username: string;
   nama: string;
