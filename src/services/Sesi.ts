@@ -217,8 +217,18 @@ export class Sesi {
       .from(models.Sesi, "sesi")
       .groupBy("sesi.state")
       .getRawMany()
+
+    let summary = result.reduce((acc, curr) => {
+      acc[curr.sesi_state] = curr.jumlah
+      return acc
+    }, {})
+    
+    if (summary.SCHEDULED === undefined) { summary.SCHEDULED = 0 }
+    if (summary.DONE === undefined) { summary.DONE = 0 }
+    if (summary.ONGOING === undefined) { summary.ONGOING = 0 }
+    if (summary.CANCELED === undefined) { summary.CANCELED = 0 }
   
-    return result.map( ({ sesi_state, jumlah }) => ({ state: sesi_state, count: parseInt(jumlah) }) )
+    return summary
   }
 
   public async deleteSession(idSesi: number) : Promise<number> {

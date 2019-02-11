@@ -174,8 +174,10 @@ type Sesi {
 }
 
 type SesiStateCount {
-  state: String!
-  count: Int!
+  DONE: Int!
+  ONGOING: Int!
+  CANCELED: Int!
+  SCHEDULED: Int!
 }
 
 enum SesiState {
@@ -339,7 +341,7 @@ type Query {
   nextSession : Sesi
   lastSession : Sesi
 
-  countPerState : [SesiStateCount]!
+  countPerState : SesiStateCount!
 }
 
 type Mutation {
