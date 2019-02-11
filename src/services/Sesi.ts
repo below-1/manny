@@ -138,7 +138,7 @@ export class Sesi {
     // Add nominal based on package
     const repo = this.connection.getRepository<models.PaketJasa>(models.PaketJasa);
     const pj = await repo.findOne(session.idPaketJasa);
-    session.nominal = pj.harga;
+    // session.nominal = pj.harga;
 
     session = await this.sessionRepo.save(session);
     
