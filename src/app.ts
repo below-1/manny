@@ -5,6 +5,7 @@ import * as torm from 'typeorm';
 import * as models from './models';
 import mainResolverFn from './resolvers';
 import mainRoutesFn from './routes';
+// import * as express from 'express'
 import * as fs from 'fs';
 import * as util from 'util';
 import * as services from './services';
@@ -92,6 +93,7 @@ export async function startServer() {
   const expressApp = express();
   expressApp.use(cors());
   expressApp.use(fileUpload());
+  expressApp.use(express.static('static'));
   apolloServer.applyMiddleware({ app: expressApp });
 
   const routesOptions = {
