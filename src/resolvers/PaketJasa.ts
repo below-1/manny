@@ -16,7 +16,6 @@ export default async function ({ box } : { box: Box }) {
           box.repo.paketJasa.findOne(id, { relations: ["listCabang"] })
         );
         result.cabang = result.listCabang;
-        result.items = JSON.parse(result.items);
         return result;
       }
     },
@@ -94,6 +93,29 @@ export default async function ({ box } : { box: Box }) {
       },
       items: async (paketJasa: models.PaketJasa, { options } : { options: PaginationOption }) => {
         return JSON.parse(paketJasa.items)
+      },
+      kunjunganTerakhir: async (paketJasa: models.PaketJasa) => {
+        let temp = await (
+          box.repo.sesi
+            .createQueryBuilder("sesi")
+            .select("sesi.scheduledStartTime")
+            .leftJoinAndSelect("sesi.paketJasa", "paketJasa")
+            .where("paketJasa.id = :id", { id: paketJasa.id })
+            .orderBy("sesi.scheduledStartTime")
+            .getOne()
+        )
+        if (!temp) return 'Never'
+        return temp.scheduledStartTime
+      },
+      totalKunjungan: async (paketJasa: models.PaketJasa) => {
+        return await (
+          box.repo.sesi
+            .createQueryBuilder("sesi")
+            .select("sesi")
+            .leftJoinAndSelect("sesi.paketJasa", "paketJasa")
+            .where("paketJasa.id = :id", { id: paketJasa.id })
+            .getCount()
+        )
       }
     }
   }

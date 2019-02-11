@@ -14,6 +14,9 @@ export class PaketJasa {
   @Column()
   nama: String;
 
+  @Column()
+  avatar: String;
+
   @Column('double')
   harga: number;
 

@@ -17,11 +17,14 @@ type BaseTransaksi {
 type User {
   id: Int!
   nama: String!
+  username: String!
   avatar: String!
   kategori: String!
 
-  sesi: [Sesi]!
+  sessions(options: PaginationOption): [Sesi]!
   transaksi: [Transaksi]!
+  totalKunjungan: Int!
+  kunjunganTerakhir: Date!
 }
 
 type Cabang {
@@ -41,16 +44,23 @@ type Barbermen {
   avatar: String
   aktif: Boolean
   sessions(options: PaginationOption): [Sesi]!
+  totalKunjungan: Int!
+  kunjunganTerakhir: Date!
 }
 
 type Item {
   id: Int!
   nama: String!
   deskripsi: String!
-  hargaJual: Float!
+  hargaJual: Float
+  hargaBeli: Float!
+  satuanBerat: String
+  berat: Float
+  brand: String
   avatar: String!
   stock: Int!
-  mutations: [MutasiItem]!
+  mutations(options: PaginationOption): [MutasiItem]!
+  dijual: Boolean!
 }
 
 # type MutasiItem {
@@ -65,7 +75,27 @@ type Item {
 #   type: String!
 # }
 
-type Penjualan {
+interface Transaksi {
+  id: Int!
+  nominal: Float!
+  waktu: Date!
+  cabang: Cabang!
+  addedBy: User!
+  keterangan: String
+}
+
+interface MutasiItem {
+  id: Int!
+  nominal: Float!
+  waktu: Date!
+  cabang: Cabang!
+  addedBy: User!
+  keterangan: String
+  item: Item!
+  jumlah: Int!
+}
+
+type Penjualan implements MutasiItem {
   id: Int!
   item: Item!
   jumlah: Int!
@@ -77,7 +107,7 @@ type Penjualan {
   forUser: User!
   type: String!
 }
-type Pembelian {
+type Pembelian implements MutasiItem {
   id: Int!
   item: Item!
   jumlah: Int!
@@ -88,7 +118,7 @@ type Pembelian {
   addedBy: User!
   type: String!
 }
-type Penggunaan {
+type Penggunaan implements MutasiItem {
   id: Int!
   item: Item!
   jumlah: Int!
@@ -100,8 +130,12 @@ type Penggunaan {
   type: String!
 }
 
-union MutasiItem = Pembelian | Penjualan | Penggunaan
-union Transaksi = Pembelian | Penjualan | Penggunaan | Sesi
+# union MutasiItem = Pembelian | Penjualan | Penggunaan
+# union Transaksi = Pembelian | Penjualan | Penggunaan | Sesi
+
+type MutasiConnection {
+  mutations(options: PaginationOption): [MutasiItem]!
+}
 
 type PaketJasa {
   id: Int!
@@ -112,8 +146,10 @@ type PaketJasa {
   estimasiWaktu: Int!
   pictures: [Media]!
   cabang: [Cabang]!
-  sessions: [Sesi]!
+  sessions(options: PaginationOption): [Sesi]!
   keterangan: String!
+  totalKunjungan: Int!
+  kunjunganTerakhir: Date!
 }
 
 type Media {
@@ -137,6 +173,11 @@ type Sesi {
   rating: Int
 }
 
+type SesiStateCount {
+  state: String!
+  count: Int!
+}
+
 enum SesiState {
   SCHEDULED,
   ONGOING,
@@ -149,6 +190,12 @@ input PaginationOption {
   take: Int!
 }
 
+input CreateUserInput {
+  nama: String!
+  username: String!
+  avatar: String!
+}
+
 input ItemMutationsOption {
   skip: Int!
   take: Int!
@@ -159,7 +206,12 @@ input ItemCreateInput {
   nama: String!
   avatar: String
   deskripsi: String
-  hargaJual: Float!
+  hargaJual: Float
+  hargaBeli: Float
+  satuanBerat: String
+  berat: Float
+  brand: String
+  dijual: Boolean!
   idCabang: Int!
 
   nominal: Float!
@@ -169,6 +221,17 @@ input ItemCreateInput {
   idAddedBy: Int!
 }
 
+input ItemUpdateInput {
+  nama: String!
+  deskripsi: String!
+  hargaJual: Float
+  hargaBeli: Float!
+  satuanBerat: String
+  berat: Float
+  brand: String
+  dijual: Boolean!
+}
+
 input BaseMutasiInput {
   idItem: Int!
   nominal: Float!
@@ -176,6 +239,13 @@ input BaseMutasiInput {
   keterangan: String
   waktu: Date
   idAddedBy: Int!
+}
+
+input BaseUpdateMutasiInput {
+  nominal: Float!
+  jumlah: Int!
+  keterangan: String
+  waktu: Date
 }
 
 input SellInput {
@@ -245,33 +315,38 @@ input CreateAdminInput {
   idsCabang: [Int]!
 }
 
-input TimelineOptions {
-  idCabang: Int!
-  skip: Int!
-  take: Int!
-}
-
 type Query {
-
-  listCabang: [Cabang]!
+  
   cabangById(id: Int!) : Cabang!
-  itemById(id: Int!, options: PaginationOption!) : Item!
+  itemById(id: Int!) : Item!
   sessionById(id: Int!) : Sesi!
   barbermenById(id: Int!) : Barbermen!
   paketJasaById(id: Int!) : PaketJasa!
-  mutasiById(id: Int!) : MutasiItem!
+  mutationsByItem(idItem: Int!, options: PaginationOption!) : [MutasiItem]!
   userById(id: Int!) : User!
-  listSessionInRange(options: FindSessionInRangeOptions!) : [Sesi]!
-  listUser(options: PaginationOption!) : [PaketJasa]!
+  mutationById(id: Int!) : MutasiItem!
 
-  timeline(options: TimelineOptions!) : [Transaksi]!
+  listCabang: [Cabang]!
+  listSessionInRange(options: FindSessionInRangeOptions!) : [Sesi]!
+  listUser(options: PaginationOption!) : [User]!
+  listItem(idCabang: Int!, options: PaginationOption!) : [Item]!
+  listProduk(idCabang: Int!, options: PaginationOption!) : [Item]!
+
+  timeline(idCabang: Int!, options: PaginationOption!) : [Transaksi]!
+
+  findUser(keyword: String!) : [User]!
   
+  nextSession : Sesi
+  lastSession : Sesi
+
+  countPerState : [SesiStateCount]!
 }
 
 type Mutation {
 
-  signUpCustomer(nama: String!) : User!
+  signUpCustomer(name: String!, avatar: String!) : User!
   signUpAdmin(payload: CreateAdminInput!) : User!
+  deleteCustomer(id: Int!) : Int!
 
   createCabang(payload: CreateCabangInput!) : Cabang!
   updateCabang(id: Int!, payload: CreateCabangInput!) : Cabang
@@ -281,11 +356,14 @@ type Mutation {
 
   createBarbermen(payload: CreateBarbermenInput!) : Barbermen!
   updateBarbermen(id: Int!, payload: CreateBarbermenInput!) : Barbermen
+  changeBarbermenName(id: Int!, nama: String!) : Barbermen!
 
-  buyNewItem(payload: ItemCreateInput!) : Pembelian!
+  buyNewItem(payload: ItemCreateInput!) : Item!
   buyMoreItem(payload: BaseMutasiInput!) : Pembelian!
   sellItem(payload: SellInput!) : Penjualan!
   useItem(payload: BaseMutasiInput!) : Penggunaan!
+  updateItem(id: Int!, payload: ItemUpdateInput!) : Item!
+  updateMutation(idMutasi: Int!, payload: BaseUpdateMutasiInput!) : Int!
 
   openSession (payload: OpenSessionInput!) : Sesi!
   cancelSession (id: Int!) : Sesi!

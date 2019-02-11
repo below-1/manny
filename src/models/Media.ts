@@ -14,6 +14,9 @@ export class Media {
   type: String;
 
   @Column()
+  description: String;
+
+  @Column()
   avatar: boolean;
 
   @Column()

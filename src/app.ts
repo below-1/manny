@@ -4,11 +4,14 @@
 import * as torm from 'typeorm';
 import * as models from './models';
 import mainResolverFn from './resolvers';
+import mainRoutesFn from './routes';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as services from './services';
 
 const express = require('express');
+const cors = require('cors');
+const fileUpload = require('express-fileupload');
 
 import {
   Box
@@ -86,7 +89,15 @@ export async function startServer() {
   const apolloServer = new ApolloServer({ schema });
 
   const expressApp = express();
+  expressApp.use(cors());
+  expressApp.use(fileUpload());
   apolloServer.applyMiddleware({ app: expressApp });
+
+  const routesOptions = {
+    app: expressApp,
+    context: db
+  }
+  const Routes = await mainRoutesFn(routesOptions);
 
   expressApp.listen({ port: 4000 }, () => {
     console.log(`SERVER RUN AT 4000`);

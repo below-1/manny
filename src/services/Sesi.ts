@@ -36,12 +36,15 @@ export class Sesi {
       .leftJoinAndSelect("sesi.forUser", "user")
       .leftJoinAndSelect("sesi.barbermen", "barbermen")
       .where("sesi.scheduledStartTime > :start", { start })
-      .andWhere("sesi.executionEndTime < :end", { end });
+      .andWhere("sesi.scheduledStartTime < :end", { end })
+      .orderBy("sesi.scheduledStartTime", "DESC");
 
     // Ignore state filter if states is empty.
     let result = (states.length == 0) 
       ? await query.getMany()
       : await query.andWhere("sesi.state IN (:states)", { states }).getMany();
+
+    console.log(result)
 
     return result;
   }
@@ -76,6 +79,7 @@ export class Sesi {
   private async changeState(idSesi: number, state: models.SesiState) : Promise<models.Sesi> {
     let session = await this.sessionRepo.findOne(idSesi);
     session.state = state;
+    await this.sessionRepo.save(session)
     return session;
   }
 
@@ -170,6 +174,51 @@ export class Sesi {
     session.rating = rating;
     session = await this.sessionRepo.save(session);
     return session;
+  }
+
+  public async nextSession() : Promise<models.Sesi> {
+
+    let sesi = await this.connection.createQueryBuilder()
+      .select("sesi")
+      .from(models.Sesi, "sesi")
+      .where("sesi.scheduledStartTime > NOW()")
+      .andWhere("sesi.state = 'SCHEDULED'")
+      .orderBy('sesi.scheduledStartTime', 'ASC')
+      .getOne()
+    
+    if (!sesi) {
+      throw new Error('Can not find sesi')
+    }
+    return sesi
+  }
+
+  public async lastSession() : Promise<models.Sesi> {
+
+    let sesi = await this.connection.createQueryBuilder()
+      .select("sesi")
+      .from(models.Sesi, "sesi")
+      .where("sesi.scheduledStartTime < NOW()")
+      .andWhere("sesi.state = 'DONE'")
+      .orderBy('sesi.executionEndTime', 'DESC')
+      .getOne()
+    
+    if (!sesi) {
+      throw new Error('Can not find sesi')
+    }
+    return sesi
+  }
+
+  public async countPerState() : Promise<any> {
+    let result = await this.connection.createQueryBuilder()
+      .select([
+        "sesi.state",
+        "COUNT(sesi.state) AS jumlah"
+      ])
+      .from(models.Sesi, "sesi")
+      .groupBy("sesi.state")
+      .getRawMany()
+  
+    return result.map( ({ sesi_state, jumlah }) => ({ state: sesi_state, count: parseInt(jumlah) }) )
   }
 
   public async deleteSession(idSesi: number) : Promise<number> {

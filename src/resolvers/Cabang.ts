@@ -56,6 +56,7 @@ export default async function ({ box } : { box: Box }) {
               .getOne()
           );
           result = xs.listPaketJasa;
+          console.log(result)
         } catch (err) {
           console.log(err);
           throw err;

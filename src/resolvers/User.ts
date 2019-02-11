@@ -60,11 +60,21 @@ export default async function ({ box } : { box: Box }) {
           box.repo.user.findOne(id)
         );
         return result;
+      },
+      findUser: async (_: any, { keyword }) => {
+        let k = `%${keyword.toUpperCase()}%`
+        let result = await box.repo.user.createQueryBuilder('user')
+          .where('UPPER(user.nama) LIKE :keyword', { keyword: k })
+          .andWhere('user.kategori = :kat', { kat: 'CUSTOMER' })
+          .take(30)
+          .getMany()
+        return result
       }
     },
     Mutation: {
-      signUpCustomer: async (_: any, { name } : { name: string }) => {
-        let payload = { name, username: name, kategori: 'CUSTOMER' }
+      signUpCustomer: async (_: any, { name, avatar }) => {
+        let username = name.replace(/\s\s+/g, '')
+        let payload = { nama: name, username, kategori: 'CUSTOMER', avatar }
         let result = await box.repo.user.create(payload as torm.DeepPartial<models.User>);
         result = await box.repo.user.save(result);
         return result;
@@ -76,6 +86,10 @@ export default async function ({ box } : { box: Box }) {
         let result = await box.repo.user.create(_payload as torm.DeepPartial<models.User>);
         result = await box.repo.user.save(result);
         return result;
+      },
+      deleteCustomer: async (_ : any, { id }) => {
+        await box.repo.user.delete(id)
+        return 1
       }
     },
     User: {
@@ -85,6 +99,41 @@ export default async function ({ box } : { box: Box }) {
         let result = mutations.concat(sessions);
         result = result.sort((a, b) => (a.waktu).getTime() - (b.waktu).getTime());
         return result.slice(0, options.take);
+      },
+      kunjunganTerakhir: async (user: models.User) => {
+        let temp = await (
+          box.repo.sesi
+            .createQueryBuilder("sesi")
+            .select("sesi.scheduledStartTime")
+            .leftJoinAndSelect("sesi.forUser", "user")
+            .where("user.id = :id", { id: user.id })
+            .orderBy("sesi.scheduledStartTime")
+            .getOne()
+        )
+        return temp.scheduledStartTime
+      },
+      totalKunjungan: async (user: models.User) => {
+        return await (
+          box.repo.sesi
+            .createQueryBuilder("sesi")
+            .select("sesi")
+            .leftJoinAndSelect("sesi.forUser", "user")
+            .where("user.id = :id", { id: user.id })
+            .getCount()
+        )
+      },
+      sessions: async (user: models.User, { options } : { options: PaginationOption }) => {
+        let result = await (
+          box.repo.sesi
+            .createQueryBuilder("sesi")
+            .select("sesi")
+            .leftJoinAndSelect("sesi.forUser", "user")
+            .where("user.id = :id", { id: user.id })
+            .skip(options.skip)
+            .take(options.take)
+            .getMany()
+        );
+        return result
       }
     }
   }

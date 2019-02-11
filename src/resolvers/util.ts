@@ -38,23 +38,28 @@ export default async function ({ box } : { box: Box }) {
 
   return {
     Query: {
-      timeline: async (_: any, { idCabang, skip, take } : TimelineOptions) => {
+      timeline: async (_: any, { idCabang, options }) => {
         let cabang = await box.repo.cabang.findOne(idCabang);
-        let pageOptions = { skip, take };
+        let pageOptions = options;
         let mutations = (await findMutations(idCabang, pageOptions)) as TimeSortable[];
         let sessions = (await findSession(idCabang, pageOptions)) as TimeSortable[];
         let result = mutations.concat(sessions);
         result = result.sort((a, b) => (a.waktu).getTime() - (b.waktu).getTime());
-        return result.slice(0, take);
+        return result.slice(0, options.take);
       }
     },
     Mutation: {
     },
     MutasiItem: {
       __resolveType(obj, context, info) {
-        if (obj.type == 'Pembelian') return 'Pembelian';
-        if (obj.type == 'Penjualan') return 'Penjualan';
-        if (obj.type == 'Penggunaan') return 'Penggunaan';
+        // return 'MutasiItem'
+        if (obj.type === 'Pembelian') return 'Pembelian';
+        if (obj.type === 'Penjualan') return 'Penjualan';
+        if (obj.type === 'Penggunaan') return 'Penggunaan';
+        else {
+          console.log('This can not happen')
+          console.log(obj)
+        }
       }
     },
     Transaksi: {

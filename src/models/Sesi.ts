@@ -43,13 +43,17 @@ export class Sesi implements TimeSortable {
 
   @Column({ type: 'int', nullable: false })
   idBarbermen: number;
-  @ManyToOne(type => Barbermen)
+  @ManyToOne(type => Barbermen, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'idBarbermen' })
   barbermen: Barbermen;
 
   @Column({ type: 'int', nullable: false })
   idForUser: number;
-  @ManyToOne(type => User)
+  @ManyToOne(type => User, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'idForUser' })
   forUser: User;
 

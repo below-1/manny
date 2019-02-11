@@ -6,6 +6,7 @@ import {
   BaseMutasiInput,
   BaseUpdateMutasiInput,
   ItemCreateInput,
+  ItemUpdateInput,
   BaseTransaksiInput,
   SellInput,
   PaginationOption,
@@ -33,12 +34,20 @@ export class Inventory {
     let input: DeepPartial<entities.Item> = {
       nama: item.nama,
       avatar: item.avatar,
-      hargaJual: item.hargaJual,
       deskripsi: item.deskripsi,
-      idCabang: item.idCabang
+      idCabang: item.idCabang,
+      dijual: item.dijual,
+      hargaBeli: item.hargaBeli,
+      satuanBerat: item.satuanBerat,
+      brand: item.brand,
+      berat: item.berat
     };
+
+    if (input.dijual) {
+      input.hargaJual = item.hargaJual;
+    }
+
     let itemEnt = this.itemRepo.create(input);
-    console.log(itemEnt);
     let result = await this.itemRepo.save(itemEnt);
 
     // Add first mutasi for this item.
@@ -54,6 +63,18 @@ export class Inventory {
     await this.buyMoreItem(mutasiInput);
 
     return result;
+  }
+
+  public async updateItem (id: number, item: ItemUpdateInput) : Promise<entities.Item> {
+    let input: DeepPartial<entities.Item> = item
+    console.log(id)
+    await this.connection
+      .createQueryBuilder()
+      .update(entities.Item)
+      .set({ ...input })
+      .where("id = :id", { id })
+      .execute()
+    return await this.itemRepo.findOne(id)
   }
 
   public async buyMoreItem (payload: BaseMutasiInput) : Promise<entities.Pembelian> {
@@ -106,6 +127,7 @@ export class Inventory {
     return await this.penjualanRepo.save(penjualan);
   }
 
+
   public async useItem (payload: BaseMutasiInput) : Promise<entities.Penggunaan> {
     if (!(await this.stockGreaterThan(payload.idItem, payload.jumlah))) {
       throw new Error("Stock tidak mencukupi");
@@ -129,6 +151,24 @@ export class Inventory {
     return await this.penggunaanRepo.save(penggunaan);
   }
 
+  public async mutationById(idMutasi: number) : Promise<entities.MutasiItem> {
+    let result = await this.connection.createQueryBuilder()
+      .select("mutasi_item")
+      .from(entities.MutasiItem, "mutasi_item")
+      .where("mutasi_item.id = :id", { id: idMutasi })
+      .getOne()
+    if (result instanceof entities.Pembelian) {
+      result.type = 'Pembelian'
+    }
+    if (result instanceof entities.Penjualan) {
+      result.type = 'Penjualan'
+    }
+    if (result instanceof entities.Penggunaan) {
+      result.type = 'Penggunaan'
+    }
+    return result
+  }
+
   public async mutationFor(idItem: number, { skip = 0, take = 30 }: PaginationOption): Promise<entities.MutasiItem[]> {
     let where = { idItem };
     let options = { where, skip, take };
@@ -139,7 +179,9 @@ export class Inventory {
     let result: any[] = penggunaan.concat(penjualan).concat(pembelian);
 
     // Sorting descending
-    result = result.sort((a, b) => a.waktu.getMilliseconds() - b.waktu.getMilliseconds());
+    result = result.sort((a, b) => {
+      return b.waktu.getTime() - a.waktu.getTime()
+    });
 
     // Change (nominal) and (jumlah) accordingly
     // If row is Pembelian => change nominal to positive
@@ -149,14 +191,17 @@ export class Inventory {
       if (t instanceof entities.Penggunaan) {
         t.jumlah *= -1;
         t.type = 'Penggunaan';
+        let x: any = t
       }
       if (t instanceof entities.Penjualan) {
         t.jumlah *= -1;
         t.type = 'Penjualan';
+        let x: any = t
       }
       if (t instanceof entities.Pembelian) {
         t.nominal *= -1;
         t.type = 'Pembelian';
+        let x: any = t
       }
       return t;
     });
@@ -182,6 +227,7 @@ export class Inventory {
     if (payload.nominal) row.nominal = payload.nominal;
     if (payload.keterangan) row.keterangan = payload.keterangan;
     if (payload.jumlah) row.jumlah = payload.jumlah;
+    if (payload.waktu) row.waktu = payload.waktu;
 
     let result = em.save(row);
     return result;

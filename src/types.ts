@@ -24,12 +24,30 @@ export interface Box {
   repo: Repo;
 }
 
+export interface ItemUpdateInput {
+  nama: string;
+  avatar: string;
+  deskripsi: string;
+  idCabang: number;
+  dijual: boolean;
+  hargaJual: number;
+  hargaBeli: number;
+  satuanBerat: string;
+  berat: number;
+  brand: string;
+}
+
 export interface ItemCreateInput {
   nama: string;
   avatar: string;
   deskripsi: string;
   hargaJual: number;
   idCabang: number;
+  dijual: boolean;
+  hargaBeli: number;
+  satuanBerat: string;
+  berat: number;
+  brand: string;
 
   nominal: number;
   jumlah: number;
@@ -56,7 +74,6 @@ export interface BaseMutasiInput {
 }
 
 export interface BaseUpdateMutasiInput {
-  idItem: number;
   nominal: number;
   jumlah?: number;
   keterangan?: string;

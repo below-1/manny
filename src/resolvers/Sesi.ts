@@ -35,6 +35,15 @@ export default async function (options: { box: Box, service: Sesi }) {
         let result: any = await service.sessionById(id);
         result.user = result.forUser;
         return result;
+      },
+      nextSession: async (_, __) => {
+        return await service.nextSession()
+      },
+      lastSession: async (_, __) => {
+        return await service.lastSession()
+      },
+      countPerState : async (_, __) => {
+        return await service.countPerState()
       }
     },
     Mutation: {
@@ -65,7 +74,8 @@ export default async function (options: { box: Box, service: Sesi }) {
       },
 
       deleteSession: async (_: any, { id } : { id: number }) => {
-        return await service.deleteSession(id);
+        await service.deleteSession(id);
+        return 1;
       }
     },
     Sesi: {
@@ -79,7 +89,7 @@ export default async function (options: { box: Box, service: Sesi }) {
         return await box.repo.user.findOne(sesi.idAddedBy);
       },
       barbermen: async (sesi: entities.Sesi, __: any) => {
-        return await box.repo.user.findOne(sesi.idBarbermen);
+        return await box.repo.barbermen.findOne(sesi.idBarbermen);
       }
     }
   };
