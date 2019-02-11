@@ -36,6 +36,10 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "run-index": "npx ts-node ./src/index.ts"
+    "run-index": "npx ts-node ./src/index.ts",
+    "start": "npx ts-node ./src/index.ts"
+  },
+  "engines": {
+    "node": "8.11.4"
   }
 }

@@ -8,6 +8,7 @@ import mainRoutesFn from './routes';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as services from './services';
+const PORT = process.env.PORT || 4000
 
 const express = require('express');
 const cors = require('cors');
@@ -99,8 +100,8 @@ export async function startServer() {
   }
   const Routes = await mainRoutesFn(routesOptions);
 
-  expressApp.listen({ port: 4000 }, () => {
-    console.log(`SERVER RUN AT 4000`);
+  expressApp.listen({ port: PORT }, () => {
+    console.log(`SERVER RUN AT ${PORT}`);
   });
 
 }
