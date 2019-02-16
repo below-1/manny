@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "MODE=prod PORT=8080 npx ts-node ./src/index.ts"
+  "exec": "MODE=dev PORT=4000 npx ts-node ./src/index.ts"
 }

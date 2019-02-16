@@ -43,6 +43,6 @@
     "start-prod": "MODE=prod PORT=8080 node ./dist/index.js"
   },
   "engines": {
-    "node": "8.15.0"
+    "node": "8.11.1"
   }
 }
