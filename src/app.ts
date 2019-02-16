@@ -10,11 +10,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 import * as services from './services';
 
-const cmdline = require('node-cmdline-parser')
-const PORT = cmdline.get('port')
-const MODE = cmdline.get('mode')
-console.log('port:', PORT)
-console.log('mode:', MODE)
+const PORT = process.env.PORT
+const MODE = process.env.MODE
 
 const express = require('express');
 const cors = require('cors');

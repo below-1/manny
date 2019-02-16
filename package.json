@@ -40,7 +40,7 @@
     "start": "nodemon",
     "run-index": "npx ts-node ./src/index.ts",
     "build": "npx tsc",
-    "start-prod": "node ./dist/index.js --mode prod --port 8080"
+    "start-prod": "MODE=prod PORT=8080 node ./dist/index.js"
   },
   "engines": {
     "node": "8.15.0"
