@@ -1,0 +1,25 @@
+{
+  "dev": {
+    "db": {
+      "type": "mysql",
+      "host": "localhost",
+      "username": "root",
+      "password": "",
+      "port": 3306,
+      "database": "manliest-db",
+      "synchronize": true,
+      "logging": true
+    }
+  },
+  "prod": {
+    "db": {
+      "type": "mariadb",
+      "host": "localhost",
+      "username": "dv370_manliest",
+      "password": "Fah7SI.mU-5671",
+      "port": 3306,
+      "database": "dv370232_manliest-db",
+      "synchronize": true
+    }
+  }
+}

@@ -9,11 +9,17 @@ import mainRoutesFn from './routes';
 import * as fs from 'fs';
 import * as util from 'util';
 import * as services from './services';
+
 const PORT = process.env.PORT || 4000
+const MODE = process.env.mode || 'dev'
 
 const express = require('express');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
+
+// Load the config
+const config = require('../config')
+const dbConfig = config[MODE]['db']
 
 import {
   Box
@@ -43,13 +49,7 @@ export async function createDbConnection({ sync }) : Promise<Box> {
     models.Penggunaan
   ];
   const dbConn: torm.Connection = await torm.createConnection({
-    type: 'mysql',
-    host: 'localhost',
-    username: 'root',
-    port: 3306,
-    database: 'manliest-db',
-    synchronize: sync,
-    logging: true,
+    ...dbConfig,
     entities
   });
 
@@ -82,7 +82,7 @@ export async function startServer() {
   };
 
   const resolvers = await mainResolverFn(resolverArgs);
-  const textGql = (await readFile('./src/schema.graphql')).toString();
+  const textGql = (await readFile('schema.graphql')).toString();
 
   const schema = makeExecutableSchema({
     typeDefs: textGql,
