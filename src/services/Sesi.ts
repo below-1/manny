@@ -185,10 +185,6 @@ export class Sesi {
       .andWhere("sesi.state = 'SCHEDULED'")
       .orderBy('sesi.scheduledStartTime', 'ASC')
       .getOne()
-    
-    if (!sesi) {
-      throw new Error('Can not find sesi')
-    }
     return sesi
   }
 
@@ -200,11 +196,7 @@ export class Sesi {
       .where("sesi.scheduledStartTime < NOW()")
       .andWhere("sesi.state = 'DONE'")
       .orderBy('sesi.executionEndTime', 'DESC')
-      .getOne()
-    
-    if (!sesi) {
-      throw new Error('Can not find sesi')
-    }
+      .getOne()    
     return sesi
   }
 

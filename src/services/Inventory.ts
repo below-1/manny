@@ -78,10 +78,8 @@ export class Inventory {
   }
 
   public async buyMoreItem (payload: BaseMutasiInput) : Promise<entities.Pembelian> {
-    console.log(payload);
     // Get item
     let item = await this.itemRepo.findOne(payload.idItem);
-    console.log('item = ', item);
     // Create transaksi
     let idCabang = item.idCabang;
 
@@ -139,7 +137,7 @@ export class Inventory {
     let penggunaanInput = {
       // Jumlah must be negative
       jumlah: payload.jumlah * -1,
-      idItem: payload.jumlah,
+      idItem: payload.idItem,
       idCabang,
       idAddedBy: payload.idAddedBy,
       waktu: payload.waktu,

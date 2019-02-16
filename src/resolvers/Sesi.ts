@@ -37,10 +37,14 @@ export default async function (options: { box: Box, service: Sesi }) {
         return result;
       },
       nextSession: async (_, __) => {
-        return await service.nextSession()
+        let result = await service.nextSession()
+        if (!result) return null
+        return result
       },
       lastSession: async (_, __) => {
-        return await service.lastSession()
+        let result = await service.lastSession()
+        if (!result) return null
+        return result
       },
       countPerState : async (_, __) => {
         return await service.countPerState()
