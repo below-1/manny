@@ -366,6 +366,7 @@ type Mutation {
   useItem(payload: BaseMutasiInput!) : Penggunaan!
   updateItem(id: Int!, payload: ItemUpdateInput!) : Item!
   updateMutation(idMutasi: Int!, payload: BaseUpdateMutasiInput!) : Int!
+  deleteItem(id: Int!) : Int!
 
   openSession (payload: OpenSessionInput!) : Sesi!
   cancelSession (id: Int!) : Sesi!

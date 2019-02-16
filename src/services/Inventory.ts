@@ -125,6 +125,9 @@ export class Inventory {
     return await this.penjualanRepo.save(penjualan);
   }
 
+  public async deleteItem(id: number) : Promise<any> {
+    await this.itemRepo.delete(id)
+  }
 
   public async useItem (payload: BaseMutasiInput) : Promise<entities.Penggunaan> {
     if (!(await this.stockGreaterThan(payload.idItem, payload.jumlah))) {

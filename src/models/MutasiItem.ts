@@ -14,7 +14,7 @@ export class MutasiItem extends Transaksi implements TimeSortable {
   @torm.Column({ type: 'int', nullable: false })
   idItem: number;
 
-  @torm.ManyToOne(type => Item)
+  @torm.ManyToOne(type => Item, { onDelete: 'CASCADE' })
   @torm.JoinColumn({ name: 'idItem' })
   item: Item;
 

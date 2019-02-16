@@ -73,7 +73,7 @@ export async function createDbConnection({ sync }) : Promise<Box> {
 }
 
 export async function startServer() {
-  const db = await createDbConnection({ sync: false });
+  const db = await createDbConnection({ sync: true });
 
   const resolverArgs = {
     box: db,

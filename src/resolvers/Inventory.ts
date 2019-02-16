@@ -65,6 +65,10 @@ export default async function (options: { box: Box, service: Inventory }) {
       buyMoreItem: async (_: any, { payload } : { payload: BaseMutasiInput }, ctx: any) => {
         return await service.buyMoreItem(payload);
       },
+      deleteItem: async (_: any, { id } : { id: number }) => {
+        await service.deleteItem(id)
+        return 1
+      },
       sellItem: async (_: any, { payload }: { payload: SellInput }, ctx: any) => {
         return await service.sellItem(payload);
       },
