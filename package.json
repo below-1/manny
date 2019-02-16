@@ -28,6 +28,7 @@
     "lodash": "^4.17.11",
     "moment": "^2.23.0",
     "mysql": "^2.16.0",
+    "node-cmdline-parser": "^1.0.2",
     "reflect-metadata": "^0.1.12",
     "sharp": "^0.21.2",
     "sqlite3": "^4.0.4",
@@ -36,10 +37,12 @@
   },
   "scripts": {
     "dev": "nodemon",
+    "start": "nodemon",
     "run-index": "npx ts-node ./src/index.ts",
-    "start": "npx ts-node ./src/index.ts"
+    "build": "npx tsc",
+    "start-prod": "node ./dist/index.js --mode prod --port 8080"
   },
   "engines": {
-    "node": "8.11.4"
+    "node": "8.15.0"
   }
 }

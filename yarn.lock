@@ -2747,6 +2747,11 @@ node-abi@^2.2.0:
   dependencies:
     semver "^5.4.1"
 
+node-cmdline-parser@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/node-cmdline-parser/-/node-cmdline-parser-1.0.2.tgz#4fcb05e49ca8a80e4250415abc409ab39da635d5"
+  integrity sha512-QaLmtfhSnKE9maz54bD/CgdZrNqtTfgrZnTlB/d80EALb747CwJnfTD+LHC0i3JzuJ9nqk0zXhZ6zeqbyBNzmQ==
+
 node-fetch@^2.1.2, node-fetch@^2.2.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.3.0.tgz#1a1d940bbfb916a1d3e0219f037e89e71f8c5fa5"

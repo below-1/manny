@@ -3,6 +3,7 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es6",
+        "lib": ["esnext", "esnext.asynciterable"],
         "noImplicitAny": false,
         "moduleResolution": "node",
         "sourceMap": true,
